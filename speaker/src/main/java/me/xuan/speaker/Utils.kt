@@ -32,6 +32,22 @@ object Utils {
         
         return null
     }
+
+    /**
+     * 读取application 节点  meta-data 信息
+     */
+    fun readMetaDataIntFromApplication(tag: String):String? {
+        try {
+            val ai: ApplicationInfo = get()!!.getPackageManager()
+                .getApplicationInfo(get()!!.getPackageName(), PackageManager.GET_META_DATA)
+            val bundle = ai.metaData
+            return bundle.getInt(tag).toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+        }
+
+        return null
+    }
     
     fun get(): Application? {
         if (application == null) {

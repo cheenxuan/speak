@@ -1,5 +1,6 @@
 package me.xuan.speaker
 
+import android.media.AudioManager
 import android.util.Log
 import com.baidu.tts.client.SpeechError
 import com.baidu.tts.client.SpeechSynthesizer
@@ -14,6 +15,7 @@ import com.baidu.tts.client.TtsMode
  */
 object SpeakManager {
 
+    const val isLog: Boolean = false
     const val TAG = "Baidu_Speak"
 
     const val BD_SPEAK_APP_ID = "BD_SPEAK_APP_ID"
@@ -24,7 +26,7 @@ object SpeakManager {
     var mSpeechSynthesizer: SpeechSynthesizer? = null
 
     fun initBaiduTTS(): SpeechSynthesizer? {
-        val appId = Utils.readMetaDataFromApplication(BD_SPEAK_APP_ID)
+        val appId = Utils.readMetaDataIntFromApplication(BD_SPEAK_APP_ID)
         val appKey = Utils.readMetaDataFromApplication(BD_SPEAK_APP_KEY)
         val secretKey = Utils.readMetaDataFromApplication(BD_SPEAK_SECRET_KEY)
         // TtsMode.MIX; 离在线融合，在线优先； TtsMode.ONLINE 纯在线； 没有纯离线
@@ -45,12 +47,15 @@ object SpeakManager {
         // 2. 设置listener
         mSpeechSynthesizer.setSpeechSynthesizerListener(object : SpeechSynthesizerListener {
             override fun onSynthesizeStart(p0: String?) {
+                toprint("onSynthesizeStart : " + p0)
             }
 
             override fun onSynthesizeDataArrived(p0: String?, p1: ByteArray?, p2: Int, p3: Int) {
+                toprint("onSynthesizeDataArrived : " + p0)
             }
 
             override fun onSynthesizeFinish(p0: String?) {
+                toprint("onSynthesizeFinish : " + p0)
             }
 
             override fun onSpeechStart(p0: String?) {
@@ -58,6 +63,7 @@ object SpeakManager {
             }
 
             override fun onSpeechProgressChanged(p0: String?, p1: Int) {
+                toprint("onSpeechProgressChanged : " + p0)
             }
 
             override fun onSpeechFinish(p0: String?) {
@@ -65,12 +71,15 @@ object SpeakManager {
             }
 
             override fun onError(p0: String?, p1: SpeechError?) {
+                toprint("onError : " + p0 + ", error : " + p1.toString())
             }
 
         })
 
         // 3. 设置appId，appKey.secretKey
+        toprint("appId: " + appId)
         mSpeechSynthesizer.setAppId(appId)
+        toprint("appKey: " + appKey + ", secretKey: " + secretKey)
         mSpeechSynthesizer.setApiKey(appKey, secretKey)
 
         // 5. 以下setParam 参数选填。不填写则默认值生效
@@ -83,7 +92,7 @@ object SpeakManager {
         // 设置合成的语调，0-15 ，默认 5
         mSpeechSynthesizer.setParam(SpeechSynthesizer.PARAM_PITCH, "6")
 
-        // mSpeechSynthesizer.setAudioStreamType(AudioManager.MODE_IN_CALL); // 调整音频输出
+//         mSpeechSynthesizer.setAudioStreamType(AudioManager.MODE_IN_CALL); // 调整音频输出
 
         // 6. 初始化
         val result = mSpeechSynthesizer?.initTts(ttsMode)
@@ -92,12 +101,16 @@ object SpeakManager {
         } else {
             checkResult(result ?: -1, "initTts")
         }
-        
+
         return mSpeechSynthesizer
     }
 
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
+
     fun speak(content: String) {
-        
+
         if (mSpeechSynthesizer == null) {
             mSpeechSynthesizer = initBaiduTTS()
         }
@@ -122,6 +135,8 @@ object SpeakManager {
     }
 
     private fun toprint(msg: String) {
-        Log.d(TAG, msg)
+        if (isLog) {
+            Log.d(TAG, msg)
+        }
     }
 }
